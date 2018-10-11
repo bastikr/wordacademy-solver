@@ -1,0 +1,6 @@
+[package]
+name = "wordacademy-solver"
+version = "0.1.0"
+authors = ["Sebastian Kraemer <basti.kr@gmail.com>"]
+
+[dependencies]
