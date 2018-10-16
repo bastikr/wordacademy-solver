@@ -98,9 +98,9 @@ fn reduced_wordlengths(wordlengths: &Vec<u8>, l: u8) -> Vec<u8> {
     w
 }
 
-fn arbitrary_solutions<'a>(wordlengths: Vec<u8>, words: Vec<&'a str>, letters : HashMap<char, u8>) -> Vec<Vec<&'a str>> {
-    let reduced_words : Vec<&'a str> = words.into_iter().filter(|x| wordlengths.contains(&(x.len() as u8)))
-                            .filter(|x| writeable_with(x, &letters))
+fn arbitrary_solutions<'a>(wordlengths: Vec<u8>, words: &[&'a String], letters : HashMap<char, u8>) -> Vec<Vec<&'a String>> {
+    let reduced_words : Vec<&'a String> = words.into_iter().filter(|x| wordlengths.contains(&(x.len() as u8)))
+                            .filter(|x| writeable_with(x, &letters)).map(|x| *x)
                             .collect();
     // println!("{}: {}", wordlengths.len(), reduced_words.len());
     let mut solutions = Vec::new();
@@ -110,10 +110,10 @@ fn arbitrary_solutions<'a>(wordlengths: Vec<u8>, words: Vec<&'a str>, letters : 
         }
         return solutions;
     }
-    for word in reduced_words.clone() {
+    for (i, word) in reduced_words.iter().enumerate() {
         let reduced_letters = reduced_histogram(&letters, &word);
         let reduced_wordlengths = reduced_wordlengths(&wordlengths, word.len() as u8);
-        let subsolutions = arbitrary_solutions(reduced_wordlengths, reduced_words.clone(), reduced_letters);
+        let subsolutions = arbitrary_solutions(reduced_wordlengths, &reduced_words[i..], reduced_letters);
         for mut sol in subsolutions {
             sol.push(word);
             solutions.push(sol);
@@ -134,7 +134,7 @@ fn main() {
     f.read_to_string(&mut contents)
         .expect("something went wrong reading the file");
     let words_lower = contents.split("\n").map(|x| x.to_string().to_lowercase()).collect::<Vec<String>>();
-    let words = words_lower.iter().map(|x| &x[..]).collect::<Vec<&str>>();
+    let words = words_lower.iter().collect::<Vec<&String>>();
     println!("Number of loaded words {}", words.len());
 
     // let board = create_board("ucegtpocebcilhal", vec![7, 6, 3], words);
@@ -142,12 +142,13 @@ fn main() {
         // println!("{}", column);
     // }
 
-    let board = "ucegtpocebcilhal";
+    // let board = "ucegtpocebcilhal";
+    let board = "breaeetfarhskcet";
     // let board = "horuaste";
     let board_histogram = histogram(board);
     // let wordlengths = vec![5, 3];
     let wordlengths = vec![7, 6, 3];
-    let S = arbitrary_solutions(wordlengths, words, board_histogram);
+    let S = arbitrary_solutions(wordlengths, &words, board_histogram);
     for solution in S.iter() {
         for word in solution {
             print!("{} ", word);
