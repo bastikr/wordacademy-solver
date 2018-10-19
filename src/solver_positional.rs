@@ -26,6 +26,50 @@ fn reduce_lengths(lengths: &Vec<usize>, l: usize) -> Vec<usize> {
     w
 }
 
+pub struct GroupedSolution {
+    solutions : Vec<Vec<Word>>,
+}
+
+impl GroupedSolution {
+    pub fn words(&self) -> Vec<String> {
+        let v : &Vec<Word> = self.solutions.iter().next().unwrap();
+        v.iter().map(|x| x.as_string()).collect()
+    }
+
+    pub fn matches(&self, solution: &Vec<Word>) -> bool {
+        let mut words = self.words();
+        for w in solution.iter() {
+            let wstring = w.as_string();
+            if !words.contains(&wstring) {
+                return false;
+            }
+            // words.remove_item(&wstring);
+        }
+        true
+    }
+
+    pub fn push(&mut self, solution: Vec<Word>) {
+        self.solutions.push(solution)
+    }
+}
+
+pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
+    let mut g : Vec<GroupedSolution> = vec![];
+    for solution in solutions {
+        let mut wasused = false;
+        for gsolution in g.iter_mut() {
+            if gsolution.matches(&solution) {
+                gsolution.push(solution.clone());
+                wasused = true;
+                break;
+            }
+        }
+        if !wasused {
+            g.push(GroupedSolution {solutions: vec![solution]});
+        }
+    }
+    g
+}
 
 fn walk(i: usize, j: usize, state: &State) -> Vec<Vec<Word>> {
     let currentchar = state.board.get(i, j);

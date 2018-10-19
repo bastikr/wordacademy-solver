@@ -32,10 +32,11 @@ fn main() {
     let wordlengths = vec![6, 7, 3];
     
     let solutions = wordacademy_solver::solver_positional::solve(board, wordlengths, &words);
-    println!("Found {} solutions.", solutions.len());
-    for solution in solutions {
-        let strings : Vec<String> = solution.iter().map(|x| x.as_string()).collect();
-        println!("{:?}", strings);
+    let gsolutions = wordacademy_solver::solver_positional::group_solutions(solutions);
+    println!("Found {} solutions.", gsolutions.len());
+    for solution in gsolutions {
+        // let strings : Vec<String> = solution.iter().map(|x| x.as_string()).collect();
+        println!("{:?}", solution.words());
     }
     // println!("Found {:?} solutions.", solutions.iter().map(|x| x.iter().map(|w| w.)));
     // let board = "horuaste";
