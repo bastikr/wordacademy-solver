@@ -1,139 +1,19 @@
-use std::fs::File;
-use std::io::prelude::*;
-use std::collections::HashMap;
+extern crate wordacademy_solver;
 
-fn histogram(word: &str) -> HashMap<char, u8> {
-    let mut h = HashMap::new();
-    for letter in word.chars() {
-        let count = h.entry(letter).or_insert(0);
-        *count += 1;
-    }
-    h
-}
-
-fn contains(subhistogram: &HashMap<char, u8>, histogram: &HashMap<char, u8>) -> bool {
-    for (letter, count) in subhistogram {
-        if match histogram.get(&letter) {
-            Some(count_available) => count>count_available,
-            None => true
-        } {return false;}
-    }
-    return true;
-}
-
-fn writeable_with(word: &str, boardletters: &HashMap<char, u8>) -> bool {
-    let wordhistogram = histogram(word);
-    contains(&wordhistogram, &boardletters)
-}
-
-struct Board<'a> {
-    words : Vec<&'a str>,
-    wordlengths : Vec<u8>,
-    columns : Vec<String>,
-    letters : HashMap<char, u8>,
-}
-
-fn create_board<'a>(board: &str, wordlengths: Vec<u8>, words: Vec<&'a str>) -> Board<'a> {
-    let board_histogram = histogram(board);
-    let selection : Vec<&'a str> = words.into_iter().filter(|x| wordlengths.contains(&(x.len() as u8)))
-                                .filter(|x| writeable_with(x, &board_histogram))
-                                .collect();
-    // let columns : Vec<String> = vec![ "uceg".to_string(), "cpbh".to_string(), "eoca".to_string(), "gcil".to_string()];
-    let mut columns = vec![];
-    let chars : Vec<char> = board.chars().collect();
-    for j in 0..4 {
-        let mut column = String::with_capacity(4);
-        for i in 0..4 {
-            column.push(chars[i*4 + j]);
-        }
-        columns.push(column);
-    }
-
-    // columns.push("uceg".to_string());
-    Board { words: selection, wordlengths: wordlengths, columns: columns, letters: board_histogram }
-}
-
-struct Solution<'a> {
-    words: Vec<&'a str>,
-    i: Vec<Vec<u8>>,
-    j: Vec<Vec<u8>>,
-}
-
-struct Mask {
-    data : Vec<Vec<bool>>,
-}
-
-fn create_mask(board: &Board) -> Mask {
-    let mut mask : Vec<Vec<bool>> = vec![];
-    for column in &board.columns {
-        mask.push(vec![true; column.len()]);
-    }
-    Mask {data : mask}
-}
-
-fn reduced_histogram(hist: &HashMap<char, u8>, letters: &str) -> HashMap<char, u8> {
-    let letter_hist = histogram(letters);
-    let mut h : HashMap<char, u8> = HashMap::new();
-    for (letter, count) in hist.iter() {
-        let c = match(letter_hist.get(letter)) {
-            Some(letters_count) => *letters_count,
-            None => 0
-        };
-        if count - c > 0 {
-            h.insert(*letter, count-c);
-        }
-    }
-    h
-}
-
-fn reduced_wordlengths(wordlengths: &Vec<u8>, l: u8) -> Vec<u8> {
-    let removed = false;
-    let mut w : Vec<u8> = Vec::with_capacity(wordlengths.len()-1);
-    for x in wordlengths {
-        if *x==l && !removed {
-            continue;
-        }
-        w.push(*x);
-    }
-    w
-}
-
-fn arbitrary_solutions<'a>(wordlengths: Vec<u8>, words: &[&'a String], letters : HashMap<char, u8>) -> Vec<Vec<&'a String>> {
-    let reduced_words : Vec<&'a String> = words.into_iter().filter(|x| wordlengths.contains(&(x.len() as u8)))
-                            .filter(|x| writeable_with(x, &letters)).map(|x| *x)
-                            .collect();
-    // println!("{}: {}", wordlengths.len(), reduced_words.len());
-    let mut solutions = Vec::new();
-    if wordlengths.len()==1 {
-        for word in reduced_words {
-            solutions.push(vec![word]);
-        }
-        return solutions;
-    }
-    for (i, word) in reduced_words.iter().enumerate() {
-        let reduced_letters = reduced_histogram(&letters, &word);
-        let reduced_wordlengths = reduced_wordlengths(&wordlengths, word.len() as u8);
-        let subsolutions = arbitrary_solutions(reduced_wordlengths, &reduced_words[i..], reduced_letters);
-        for mut sol in subsolutions {
-            sol.push(word);
-            solutions.push(sol);
-        }
-    }
-    solutions
-}
-
+use std::collections::HashSet;
 // fn solutions(board: &Board, words: &Vec<&str>) -> Vec<Solution> {
 
 // }
 
 fn main() {
     // let mut f = File::open("data/words.txt").expect("file not found");
-    let mut f = File::open("/usr/share/dict/cracklib-small").expect("file not found");
+    // let mut f = File::open("/usr/share/dict/cracklib-small").expect("file not found");
 
-    let mut contents = String::new();
-    f.read_to_string(&mut contents)
-        .expect("something went wrong reading the file");
-    let words_lower = contents.split("\n").map(|x| x.to_string().to_lowercase()).collect::<Vec<String>>();
+    // let mut contents = String::new();
+    // f.read_to_string(&mut contents)
+    //     .expect("something went wrong reading the file");
+    // let words_lower = contents.split("\n").map(|x| x.to_string().to_lowercase()).collect::<Vec<String>>();
+    let words_lower = wordacademy_solver::dictionary::load("/usr/share/dict/cracklib-small");
     let words = words_lower.iter().collect::<Vec<&String>>();
     println!("Number of loaded words {}", words.len());
 
@@ -143,19 +23,33 @@ fn main() {
     // }
 
     // let board = "ucegtpocebcilhal";
-    let board = "breaeetfarhskcet";
-    // let board = "horuaste";
-    let board_histogram = histogram(board);
-    // let wordlengths = vec![5, 3];
-    let wordlengths = vec![7, 6, 3];
-    let S = arbitrary_solutions(wordlengths, &words, board_histogram);
-    for solution in S.iter() {
-        for word in solution {
-            print!("{} ", word);
-        }
-        println!("");
+    // let wordlengths = vec![7, 6, 3];
+    // let board = "breaeetfarhskcet";
+    // let wordlengths = vec![7, 4, 5];
+    // let board = "rhilcodiyialsdac";
+    // let wordlengths = vec![5, 5, 6];
+    let board = "ildcnlotgouoerrs";
+    let wordlengths = vec![6, 7, 3];
+    
+    let solutions = wordacademy_solver::solver_positional::solve(board, wordlengths, &words);
+    println!("Found {} solutions.", solutions.len());
+    for solution in solutions {
+        let strings : Vec<String> = solution.iter().map(|x| x.as_string()).collect();
+        println!("{:?}", strings);
     }
-    println!("{} solutions found", S.len());
+    // println!("Found {:?} solutions.", solutions.iter().map(|x| x.iter().map(|w| w.)));
+    // let board = "horuaste";
+    // let board_histogram = histogram(board);
+    // let wordlengths = vec![5, 3];
+    // let wordlengths = vec![7, 6, 3];
+    // let solutions = arbitrary_solutions(wordlengths, &words, board_histogram);
+    // for solution in solutions.iter() {
+    //     for word in solution {
+    //         print!("{} ", word);
+    //     }
+    //     println!("");
+    // }
+    // println!("{} solutions found", solutions.len());
 
     // let word_histogram = histogram("rat");
     // let reducedboard_histogram = reduced_histogram(&board_histogram, "rat");
