@@ -43,12 +43,12 @@ impl Board {
     pub fn from_string(boardstring: &str) -> Board {
         let size = (boardstring.len() as f64).sqrt() as usize;
         assert!(size*size == boardstring.len());
+        let chars : Vec<char> = boardstring.chars().collect();
         let mut data : Vec<Vec<char>> = vec![];
-        let mut iter = boardstring.chars();
-        for _ in 0..size {
+        for j in 0..size {
             let mut column : Vec<char> = Vec::with_capacity(size);
-            for _ in 0..size {
-                column.push(iter.next().unwrap());
+            for i in (0..size).rev() {
+                column.push(chars[size*i + j]);
             }
             data.push(column);
         }
