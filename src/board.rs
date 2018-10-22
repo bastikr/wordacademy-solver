@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Clone, Debug)]
 pub struct Word {
     pub chars : Vec<char>,
@@ -84,6 +86,26 @@ impl Board {
     }
 }
 
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut separator = "+-".repeat(self.size());
+        separator.push_str("+");
+        writeln!(f, "");
+        for i in (0..self.size()).rev() {
+            writeln!(f, "{}", separator);
+            for j in 0..self.size() {
+                write!(f, "|");
+                if self.rows(j)>i {
+                    write!(f, "{}", self.get(i, j));
+                } else {
+                    write!(f, " ");
+                }
+            }
+            writeln!(f, "|");
+        }
+        writeln!(f, "{}", separator)
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Mask {
