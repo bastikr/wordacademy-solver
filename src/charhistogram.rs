@@ -17,9 +17,10 @@ impl CharHistogram {
 
     pub fn from_board(board: &Board) -> CharHistogram {
         let mut h = HashMap::new();
-        for column in board.data.iter() {
-            for letter in column.iter() {
-                let count = h.entry(*letter).or_insert(0);
+        for j in 0..board.size() {
+            for i in 0..board.rows(j) {
+                let letter = board.get(i, j);
+                let count = h.entry(letter).or_insert(0);
                 *count += 1;
             }
         }

@@ -34,11 +34,16 @@ impl Word {
         }
         false
     }
+
+    pub fn len(&self) -> usize {
+        self.chars.len()
+    }
 }
 
 #[derive(Debug)]
 pub struct Board {
-    pub data: Vec<Vec<char>>,
+    data: Vec<char>,
+    rows: Vec<usize>,
 }
 
 impl Board {
@@ -46,43 +51,46 @@ impl Board {
         let size = (boardstring.len() as f64).sqrt() as usize;
         assert!(size*size == boardstring.len());
         let chars : Vec<char> = boardstring.chars().collect();
-        let mut data : Vec<Vec<char>> = vec![];
+        let mut data : Vec<char> = Vec::with_capacity(size*size);
         for j in 0..size {
-            let mut column : Vec<char> = Vec::with_capacity(size);
             for i in (0..size).rev() {
-                column.push(chars[size*i + j]);
+                data.push(chars[size*i + j]);
             }
-            data.push(column);
         }
-        Board { data: data }
+        Board { data: data, rows: vec![size; size]}
     }
 
     pub fn size(&self) -> usize {
-        self.data.len()
+        self.rows.len()
     }
 
     pub fn rows(&self, j: usize) -> usize {
-        self.data[j].len()
+        self.rows[j]
     }
 
     pub fn get(&self, i: usize, j: usize) -> char {
-        self.data[j][i]
+        self.data[self.size()*j+i]
     }
 
     pub fn reduce(&self, word: &Word) -> Board {
-        let size = self.data.len();
-        let mut data : Vec<Vec<char>> = vec![];
+        let size = self.size();
+        let mut data : Vec<char> = Vec::with_capacity(self.data.len());
+        let mut rows : Vec<usize> = Vec::with_capacity(size);
         for j in 0..size {
-            let mut column : Vec<char> = Vec::with_capacity(self.data[j].len());
-            for i in 0..self.data[j].len() {
+            let mut rowcounter = 0;
+            for i in 0..self.rows(j) {
                 if word.contains_coordinates(i, j) {
                     continue;
                 }
-                column.push(self.get(i, j));
+                data.push(self.get(i, j));
+                rowcounter += 1;
             }
-            data.push(column);
+            for _i in 0..size - rowcounter {
+                data.push(' ');
+            }
+            rows.push(rowcounter);
         }
-        Board { data: data }
+        Board { data: data, rows: rows }
     }
 }
 
