@@ -85,27 +85,27 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     if !state.graph.subgraphs.contains_key(&currentchar) || !contains_a_length(state.graph, state.lengths) {
         return None;
     }
-    let currentword = state.word.add(i, j, currentchar);
-    let currentgraph : &CharGraph = state.graph.subgraphs.get(&currentchar).unwrap();
+    let word = state.word.add(i, j, currentchar);
+    let graph : &CharGraph = state.graph.subgraphs.get(&currentchar).unwrap();
     let mut solutions : Vec<Vec<Word>> = vec![];
-    if currentgraph.isword && state.lengths.contains(&currentword.len()) {
+    if graph.isword && state.lengths.contains(&word.len()) {
         if state.lengths.len()==1 {
-            return Some(vec![vec![currentword]]);
+            return Some(vec![vec![word]]);
         }
-        let reduced_board = state.board.reduce(&currentword);
-        let reduced_lengths = reduce_lengths(state.lengths, currentword.chars.len());
-        let reduced_mask = Mask::from_board(&reduced_board);
+        let board = state.board.reduce(&word);
+        let lengths = reduce_lengths(state.lengths, word.chars.len());
+        let mask = Mask::from_board(&board);
 
-        let reduced_state = State {
-                    word: Word::new(), board: &reduced_board, lengths: &reduced_lengths,
-                    mask: reduced_mask, graph: &state.dictionary_graph, ..*state };
+        let nextstate = State {
+                    word: Word::new(), board: &board, lengths: &lengths,
+                    mask, graph: &state.dictionary_graph, ..*state };
 
-        for j in 0..reduced_board.size() {
-            for i in 0..reduced_board.rows(j) {
-                match walk(i, j, &reduced_state) {
+        for j in 0..board.size() {
+            for i in 0..board.rows(j) {
+                match walk(i, j, &nextstate) {
                     Some(subsolutions) =>
                         for s in subsolutions {
-                            let mut solution = vec![currentword.clone()];
+                            let mut solution = vec![word.clone()];
                             solution.extend(s);
                             solutions.push(solution);
                         },
@@ -116,10 +116,7 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     }
     let mut mask = state.mask.clone();
     mask.set(i, j, false);
-    let nextstate = State {
-                word: currentword,
-                mask: mask, graph: currentgraph,
-                ..*state };
+    let nextstate = State { word, mask, graph, ..*state };
     for (i_next, j_next) in state.mask.neighbours(i, j) {
         match walk(i_next, j_next, &nextstate) {
             Some(subsolutions) => solutions.extend(subsolutions),
@@ -142,8 +139,8 @@ pub fn solve<'a>(boardstring: &str, lengths: Vec<usize>, words: &[&'a String]) -
     let mask = Mask::new(size);
     let word = Word::new();
     let state = State {
-                    word: word, board: &board, lengths: &lengths,
-                    mask: mask, graph: &graph, dictionary_graph: &graph};
+                    word, board: &board, lengths: &lengths,
+                    mask, graph: &graph, dictionary_graph: &graph};
     for i in 0..size {
         for j in 0..size {
             match walk(i, j, &state) {
