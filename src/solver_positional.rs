@@ -72,18 +72,18 @@ pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
     g
 }
 
-fn walk(i: usize, j: usize, state: &State) -> Vec<Vec<Word>> {
+fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     let currentchar = state.board.get(i, j);
     // println!("{}, {}: {}", i, j, state.word.add(i, j, currentchar).as_string());
     if !state.graph.subgraphs.contains_key(&currentchar) {
-        return vec![];
+        return None;
     }
     let currentword = state.word.add(i, j, currentchar);
     let currentgraph : &CharGraph = state.graph.subgraphs.get(&currentchar).unwrap();
     let mut solutions : Vec<Vec<Word>> = vec![];
     if currentgraph.isword {
         if state.lengths.len()==1 {
-            return vec![vec![currentword]];
+            return Some(vec![vec![currentword]]);
         }
         let reduced_board = state.board.reduce(&currentword);
         let reduced_lengths = reduce_lengths(state.lengths, currentword.chars.len());
@@ -102,12 +102,15 @@ fn walk(i: usize, j: usize, state: &State) -> Vec<Vec<Word>> {
         // println!("Reduced mask: {:?}", reduced_mask);
         for j in 0..reduced_board.size() {
             for i in 0..reduced_board.rows(j) {
-                let subsolutions = walk(i, j, &reduced_state);
+                match walk(i, j, &reduced_state) {
+                    Some(subsolutions) =>
                 // println!("Found {} subsolutions.", subsolutions.len());
                 for s in subsolutions {
                     let mut solution = vec![currentword.clone()];
                     solution.extend(s);
                     solutions.push(solution);
+                        },
+                    None => {}
                 }
             }
         }
@@ -118,10 +121,12 @@ fn walk(i: usize, j: usize, state: &State) -> Vec<Vec<Word>> {
                 word: currentword, board: state.board, lengths: state.lengths,
                 mask: &mask, graph: currentgraph, dictionary: state.dictionary };
     for (i_next, j_next) in mask.neighbours(i, j) {
-        let subsolutions = walk(i_next, j_next, &nextstate);
-        solutions.extend(subsolutions);
+        match walk(i_next, j_next, &nextstate) {
+            Some(subsolutions) => solutions.extend(subsolutions),
+            None => {}
+        }
     }
-    return solutions;
+    return Some(solutions);
 }
 
 pub fn solve<'a>(boardstring: &str, lengths: Vec<usize>, words: &[&'a String]) -> Vec<Vec<Word>> {
@@ -141,10 +146,10 @@ pub fn solve<'a>(boardstring: &str, lengths: Vec<usize>, words: &[&'a String]) -
                     mask: &mask, graph: &graph, dictionary: &reduced_words };
     for i in 0..size {
         for j in 0..size {
-        // let i = 1;
-        // let j = 0;
-            let subsolutions : Vec<Vec<Word>> = walk(i, j, &state);
-            solutions.extend(subsolutions);
+            match walk(i, j, &state) {
+                Some(subsolutions) => solutions.extend(subsolutions),
+                None => {}
+            }
         }
     }
     solutions
