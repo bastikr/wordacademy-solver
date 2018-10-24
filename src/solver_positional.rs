@@ -71,9 +71,18 @@ pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
     g
 }
 
+fn contains_a_length(graph: &CharGraph, lengths: &Vec<usize>) -> bool {
+    for n in lengths {
+        if graph.contains_length(*n) {
+            return true;
+        }
+    }
+    false
+}
+
 fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     let currentchar = state.board.get(i, j);
-    if !state.graph.subgraphs.contains_key(&currentchar) {
+    if !state.graph.subgraphs.contains_key(&currentchar) || !contains_a_length(state.graph, state.lengths) {
         return None;
     }
     let currentword = state.word.add(i, j, currentchar);

@@ -2,31 +2,42 @@ use std::collections::HashMap;
 
 pub struct CharGraph {
     pub isword : bool,
+    lengths : [bool; 15],
     pub subgraphs : HashMap<char, CharGraph>,
 }
 
 
 impl CharGraph {
     pub fn new() -> CharGraph {
-        CharGraph {isword: false, subgraphs: HashMap::new()}
+        CharGraph {isword: false, lengths : [false; 15], subgraphs: HashMap::new()}
     }
 
     pub fn from_strings(words: &[&String]) -> CharGraph {
         let mut graph = CharGraph::new();
         for word in words {
-            graph.push(word);
+            graph.push(word, word.len());
         }
         return graph;
     }
 
-    pub fn push(&mut self, word: &str) {
+    pub fn push(&mut self, word: &str, length: usize) {
         if word.len()==0 {
             self.isword = true;
         } else {
             let subgraph = self.subgraphs.entry(word.chars().next().unwrap())
-                                        .or_insert(CharGraph::new());
-            subgraph.push(&word[1..]);
+                                         .or_insert(CharGraph::new());
+            if length<15 {
+                self.lengths[length] = true;
+            }
+            subgraph.push(&word[1..], length);
         }
+    }
+
+    pub fn contains_length(&self, length: usize) -> bool {
+        if length>15 {
+            return true;
+        }
+        self.lengths[length]
     }
 }
 
@@ -39,8 +50,8 @@ mod tests {
     #[test]
     fn it_works() {
         let mut graph = CharGraph::new();
-        graph.push("a");
-        graph.push("aber");
+        graph.push("a", 1);
+        graph.push("aber", 4);
         assert_eq!(graph.subgraphs.len(), 1);
         // assert_eq!(graph.subgraphs, 1);
     }
