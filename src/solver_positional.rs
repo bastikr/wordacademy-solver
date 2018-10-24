@@ -7,7 +7,7 @@ struct State<'a> {
     word : Word,
     board : &'a Board,
     lengths : &'a Vec<usize>,
-    mask : &'a Mask,
+    mask : Mask,
     graph : &'a CharGraph,
     dictionary_graph : &'a CharGraph,
 }
@@ -99,7 +99,7 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
 
         let reduced_state = State {
                     word: Word::new(), board: &reduced_board, lengths: &reduced_lengths,
-                    mask: &reduced_mask, graph: &state.dictionary_graph, ..*state };
+                    mask: reduced_mask, graph: &state.dictionary_graph, ..*state };
         // println!("Found word: {}", currentword.as_string());
         // println!("Reduced words: {}", reduced_words.len());
         // println!("Reduced board: {:?}", reduced_board);
@@ -123,9 +123,9 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     mask.set(i, j, false);
     let nextstate = State {
                 word: currentword,
-                mask: &mask, graph: currentgraph,
+                mask: mask, graph: currentgraph,
                 ..*state };
-    for (i_next, j_next) in mask.neighbours(i, j) {
+    for (i_next, j_next) in state.mask.neighbours(i, j) {
         match walk(i_next, j_next, &nextstate) {
             Some(subsolutions) => solutions.extend(subsolutions),
             None => {}
@@ -148,7 +148,7 @@ pub fn solve<'a>(boardstring: &str, lengths: Vec<usize>, words: &[&'a String]) -
     let word = Word::new();
     let state = State {
                     word: word, board: &board, lengths: &lengths,
-                    mask: &mask, graph: &graph, dictionary_graph: &graph};
+                    mask: mask, graph: &graph, dictionary_graph: &graph};
     for i in 0..size {
         for j in 0..size {
             match walk(i, j, &state) {
