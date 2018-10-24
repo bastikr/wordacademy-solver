@@ -37,7 +37,8 @@ impl GroupedSolution {
     }
 
     pub fn matches(&self, solution: &Vec<Word>) -> bool {
-        let mut words = self.words();
+        // let mut words = self.words();
+        let words = self.words();
         for w in solution.iter() {
             let wstring = w.as_string();
             if !words.contains(&wstring) {
