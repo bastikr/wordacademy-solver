@@ -17,7 +17,7 @@ impl CharGraph {
         for word in words {
             graph.push(word, word.len());
         }
-        return graph;
+        graph
     }
 
     pub fn push(&mut self, word: &str, length: usize) {

@@ -8,14 +8,14 @@ pub struct Word {
 
 impl Word {
     pub fn new() -> Word {
-        return  Word {chars: vec![], coordinates: vec![]};
+        Word {chars: vec![], coordinates: vec![]}
     }
 
     pub fn add(&self, i: usize, j: usize, x: char) -> Word {
         let mut w = self.clone();
         w.chars.push(x);
         w.coordinates.push((i, j));
-        return w;
+        w
     }
 
     pub fn as_string(&self) -> String {

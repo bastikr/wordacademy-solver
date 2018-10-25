@@ -34,7 +34,7 @@ impl CharHistogram {
                 None => true
             } {return false;}
         }
-        return true;
+        true
     }
 
     pub fn writeable(&self, word: &str) -> bool {

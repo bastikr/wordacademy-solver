@@ -123,7 +123,7 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
             None => {}
         }
     }
-    return Some(solutions);
+    Some(solutions)
 }
 
 pub fn solve<'a>(boardstring: &str, lengths: Vec<usize>, words: &[&'a String]) -> Vec<Vec<Word>> {
