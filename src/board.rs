@@ -102,7 +102,7 @@ impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut separator = "+-".repeat(self.size());
         separator.push_str("+");
-        writeln!(f, "");
+        writeln!(f);
         for i in (0..self.size()).rev() {
             writeln!(f, "{}", separator);
             for j in 0..self.size() {
