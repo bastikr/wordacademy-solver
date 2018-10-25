@@ -1,4 +1,3 @@
-
 // fn reduced_wordlengths(wordlengths: &Vec<u8>, l: u8) -> Vec<u8> {
 //     let removed = false;
 //     let mut w : Vec<u8> = Vec::with_capacity(wordlengths.len()-1);

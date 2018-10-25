@@ -1,22 +1,21 @@
+use board::{Board, Mask, Word};
 use chargraph::CharGraph;
 use charhistogram::CharHistogram;
-use board::{Board, Mask, Word};
-
 
 struct State<'a> {
-    word : Word,
-    board : &'a Board,
-    lengths : &'a Vec<usize>,
-    mask : Mask,
-    graph : &'a CharGraph,
-    dictionary_graph : &'a CharGraph,
+    word: Word,
+    board: &'a Board,
+    lengths: &'a Vec<usize>,
+    mask: Mask,
+    graph: &'a CharGraph,
+    dictionary_graph: &'a CharGraph,
 }
 
 fn reduce_lengths(lengths: &[usize], l: usize) -> Vec<usize> {
     let mut removed = false;
-    let mut w : Vec<usize> = Vec::with_capacity(lengths.len()-1);
+    let mut w: Vec<usize> = Vec::with_capacity(lengths.len() - 1);
     for x in lengths {
-        if *x==l && !removed {
+        if *x == l && !removed {
             removed = true;
             continue;
         }
@@ -26,12 +25,12 @@ fn reduce_lengths(lengths: &[usize], l: usize) -> Vec<usize> {
 }
 
 pub struct GroupedSolution {
-    solutions : Vec<Vec<Word>>,
+    solutions: Vec<Vec<Word>>,
 }
 
 impl GroupedSolution {
     pub fn words(&self) -> Vec<String> {
-        let v : &Vec<Word> = self.solutions.iter().next().unwrap();
+        let v: &Vec<Word> = self.solutions.iter().next().unwrap();
         v.iter().map(|x| x.as_string()).collect()
     }
 
@@ -54,7 +53,7 @@ impl GroupedSolution {
 }
 
 pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
-    let mut g : Vec<GroupedSolution> = vec![];
+    let mut g: Vec<GroupedSolution> = vec![];
     for solution in solutions {
         let mut wasused = false;
         for gsolution in &mut g {
@@ -65,7 +64,9 @@ pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
             }
         }
         if !wasused {
-            g.push(GroupedSolution {solutions: vec![solution]});
+            g.push(GroupedSolution {
+                solutions: vec![solution],
+            });
         }
     }
     g
@@ -82,14 +83,16 @@ fn contains_a_length(graph: &CharGraph, lengths: &[usize]) -> bool {
 
 fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     let currentchar = state.board.get(i, j);
-    if !state.graph.subgraphs.contains_key(&currentchar) || !contains_a_length(state.graph, state.lengths) {
+    if !state.graph.subgraphs.contains_key(&currentchar)
+        || !contains_a_length(state.graph, state.lengths)
+    {
         return None;
     }
     let word = state.word.add(i, j, currentchar);
-    let graph : &CharGraph = &state.graph.subgraphs[&currentchar];
-    let mut solutions : Vec<Vec<Word>> = vec![];
+    let graph: &CharGraph = &state.graph.subgraphs[&currentchar];
+    let mut solutions: Vec<Vec<Word>> = vec![];
     if graph.isword && state.lengths.contains(&word.len()) {
-        if state.lengths.len()==1 {
+        if state.lengths.len() == 1 {
             return Some(vec![vec![word]]);
         }
         let board = state.board.reduce(&word);
@@ -97,8 +100,13 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
         let mask = Mask::from_board(&board);
 
         let nextstate = State {
-                    word: Word::new(), board: &board, lengths: &lengths,
-                    mask, graph: &state.dictionary_graph, ..*state };
+            word: Word::new(),
+            board: &board,
+            lengths: &lengths,
+            mask,
+            graph: &state.dictionary_graph,
+            ..*state
+        };
 
         for j in 0..board.size() {
             for i in 0..board.rows(j) {
@@ -114,9 +122,16 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     }
     let mut mask = state.mask.clone();
     mask.set(i, j, false);
-    let nextstate = State { word, mask, graph, ..*state };
+    let nextstate = State {
+        word,
+        mask,
+        graph,
+        ..*state
+    };
     for (i_next, j_next) in state.mask.neighbours(i, j) {
-        if let Some(subsolutions) = walk(i_next, j_next, &nextstate) { solutions.extend(subsolutions) }
+        if let Some(subsolutions) = walk(i_next, j_next, &nextstate) {
+            solutions.extend(subsolutions)
+        }
     }
     Some(solutions)
 }
@@ -125,21 +140,31 @@ pub fn solve<'a>(boardstring: &str, lengths: &[usize], words: &[&'a String]) -> 
     let board = Board::from_string(boardstring);
     let size = board.size();
     let board_histogram = CharHistogram::from_board(&board);
-    let reduced_words : Vec<&'a String> = words.into_iter().filter(|x| lengths.contains(&x.len()))
-                            .filter(|x| board_histogram.writeable(x)).map(|x| *x)
-                            .collect();
+    let reduced_words: Vec<&'a String> = words
+        .into_iter()
+        .filter(|x| lengths.contains(&x.len()))
+        .filter(|x| board_histogram.writeable(x))
+        .map(|x| *x)
+        .collect();
     let graph = CharGraph::from_strings(&reduced_words);
 
-    let mut solutions : Vec<Vec<Word>> = vec![];
+    let mut solutions: Vec<Vec<Word>> = vec![];
     let mask = Mask::new(size);
     let word = Word::new();
-    let lengths_ : Vec<usize> = Vec::from(lengths); 
+    let lengths_: Vec<usize> = Vec::from(lengths);
     let state = State {
-                    word, board: &board, lengths: &lengths_,
-                    mask, graph: &graph, dictionary_graph: &graph};
+        word,
+        board: &board,
+        lengths: &lengths_,
+        mask,
+        graph: &graph,
+        dictionary_graph: &graph,
+    };
     for i in 0..size {
         for j in 0..size {
-            if let Some(subsolutions) = walk(i, j, &state) { solutions.extend(subsolutions) }
+            if let Some(subsolutions) = walk(i, j, &state) {
+                solutions.extend(subsolutions)
+            }
         }
     }
     solutions

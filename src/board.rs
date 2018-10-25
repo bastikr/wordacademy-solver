@@ -2,13 +2,16 @@ use std::fmt;
 
 #[derive(Debug, Clone, Default)]
 pub struct Word {
-    pub chars : Vec<char>,
-    pub coordinates : Vec<(usize, usize)>,
+    pub chars: Vec<char>,
+    pub coordinates: Vec<(usize, usize)>,
 }
 
 impl Word {
     pub fn new() -> Word {
-        Word {chars: vec![], coordinates: vec![]}
+        Word {
+            chars: vec![],
+            coordinates: vec![],
+        }
     }
 
     pub fn add(&self, i: usize, j: usize, x: char) -> Word {
@@ -28,7 +31,7 @@ impl Word {
 
     fn contains_coordinates(&self, i: usize, j: usize) -> bool {
         for (i_word, j_word) in &self.coordinates {
-            if *i_word==i && *j_word==j {
+            if *i_word == i && *j_word == j {
                 return true;
             }
         }
@@ -53,15 +56,18 @@ pub struct Board {
 impl Board {
     pub fn from_string(boardstring: &str) -> Board {
         let size = (boardstring.len() as f64).sqrt() as usize;
-        assert!(size*size == boardstring.len());
-        let chars : Vec<char> = boardstring.chars().collect();
-        let mut data : Vec<char> = Vec::with_capacity(size*size);
+        assert!(size * size == boardstring.len());
+        let chars: Vec<char> = boardstring.chars().collect();
+        let mut data: Vec<char> = Vec::with_capacity(size * size);
         for j in 0..size {
             for i in (0..size).rev() {
-                data.push(chars[size*i + j]);
+                data.push(chars[size * i + j]);
             }
         }
-        Board { data, rows: vec![size; size]}
+        Board {
+            data,
+            rows: vec![size; size],
+        }
     }
 
     pub fn size(&self) -> usize {
@@ -73,13 +79,13 @@ impl Board {
     }
 
     pub fn get(&self, i: usize, j: usize) -> char {
-        self.data[self.size()*j+i]
+        self.data[self.size() * j + i]
     }
 
     pub fn reduce(&self, word: &Word) -> Board {
         let size = self.size();
-        let mut data : Vec<char> = Vec::with_capacity(self.data.len());
-        let mut rows : Vec<usize> = Vec::with_capacity(size);
+        let mut data: Vec<char> = Vec::with_capacity(self.data.len());
+        let mut rows: Vec<usize> = Vec::with_capacity(size);
         for j in 0..size {
             let mut rowcounter = 0;
             for i in 0..self.rows(j) {
@@ -107,7 +113,7 @@ impl fmt::Display for Board {
             writeln!(f, "{}", separator);
             for j in 0..self.size() {
                 write!(f, "|");
-                if self.rows(j)>i {
+                if self.rows(j) > i {
                     write!(f, "{}", self.get(i, j));
                 } else {
                     write!(f, " ");
@@ -121,21 +127,24 @@ impl fmt::Display for Board {
 
 #[derive(Clone, Debug)]
 pub struct Mask {
-    size : usize,
-    data : Vec<bool>,
+    size: usize,
+    data: Vec<bool>,
 }
 
 impl Mask {
     pub fn new(size: usize) -> Mask {
-        Mask { size, data: vec![true; size*size ] }
+        Mask {
+            size,
+            data: vec![true; size * size],
+        }
     }
 
     pub fn get(&self, i: usize, j: usize) -> bool {
-        self.data[self.size*j + i]
+        self.data[self.size * j + i]
     }
 
     pub fn set(&mut self, i: usize, j: usize, value: bool) {
-        self.data[self.size*j + i] = value;
+        self.data[self.size * j + i] = value;
     }
 
     pub fn from_board(board: &Board) -> Mask {
@@ -150,38 +159,37 @@ impl Mask {
 
     pub fn neighbours(&self, i: usize, j: usize) -> Vec<(usize, usize)> {
         let mut x: Vec<(usize, usize)> = vec![];
-        if i>0 {
-            if j>0 && self.get(i-1, j-1) {
-                x.push((i-1, j-1));
+        if i > 0 {
+            if j > 0 && self.get(i - 1, j - 1) {
+                x.push((i - 1, j - 1));
             }
-            if self.get(i-1, j) {
-                x.push((i-1, j));
+            if self.get(i - 1, j) {
+                x.push((i - 1, j));
             }
-            if j+1<self.size && self.get(i-1, j+1) {
-                x.push((i-1, j+1))
+            if j + 1 < self.size && self.get(i - 1, j + 1) {
+                x.push((i - 1, j + 1))
             }
         }
-        if j>0 && self.get(i, j-1) {
-            x.push((i, j-1));
+        if j > 0 && self.get(i, j - 1) {
+            x.push((i, j - 1));
         }
-        if j+1<self.size && self.get(i, j+1) {
-            x.push((i, j+1))
+        if j + 1 < self.size && self.get(i, j + 1) {
+            x.push((i, j + 1))
         }
-        if i+1<self.size {
-            if j>0 && self.get(i+1, j-1) {
-                x.push((i+1, j-1));
+        if i + 1 < self.size {
+            if j > 0 && self.get(i + 1, j - 1) {
+                x.push((i + 1, j - 1));
             }
-            if self.get(i+1, j) {
-                x.push((i+1, j));
+            if self.get(i + 1, j) {
+                x.push((i + 1, j));
             }
-            if j+1<self.size && self.get(i+1, j+1) {
-                x.push((i+1, j+1))
+            if j + 1 < self.size && self.get(i + 1, j + 1) {
+                x.push((i + 1, j + 1))
             }
         }
         x
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -190,6 +198,6 @@ mod tests {
 
     // #[test]
     // fn mask() {
-        
+
     // }
 }

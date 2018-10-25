@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use board::Board;
+use std::collections::HashMap;
 
 pub struct CharHistogram {
-    data: HashMap<char, u8>
+    data: HashMap<char, u8>,
 }
 
 impl CharHistogram {
@@ -12,7 +12,7 @@ impl CharHistogram {
             let count = h.entry(letter).or_insert(0);
             *count += 1;
         }
-        CharHistogram {data: h}
+        CharHistogram { data: h }
     }
 
     pub fn from_board(board: &Board) -> CharHistogram {
@@ -24,15 +24,17 @@ impl CharHistogram {
                 *count += 1;
             }
         }
-        CharHistogram {data: h}
+        CharHistogram { data: h }
     }
 
     pub fn contains(&self, subhistogram: &CharHistogram) -> bool {
         for (letter, subcount) in &subhistogram.data {
             if match self.data.get(&letter) {
-                Some(count_available) => subcount>count_available,
-                None => true
-            } {return false;}
+                Some(count_available) => subcount > count_available,
+                None => true,
+            } {
+                return false;
+            }
         }
         true
     }
@@ -44,19 +46,16 @@ impl CharHistogram {
 
     pub fn substract(&self, word: &str) -> CharHistogram {
         let letter_hist = CharHistogram::from_word(word);
-        let mut h : HashMap<char, u8> = HashMap::new();
+        let mut h: HashMap<char, u8> = HashMap::new();
         for (letter, count) in &self.data {
             let c = match letter_hist.data.get(letter) {
                 Some(letters_count) => *letters_count,
-                None => 0
+                None => 0,
             };
             if count - c > 0 {
-                h.insert(*letter, count-c);
+                h.insert(*letter, count - c);
             }
         }
-        CharHistogram {data: h}
+        CharHistogram { data: h }
     }
 }
-
-
-
