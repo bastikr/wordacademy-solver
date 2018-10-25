@@ -34,6 +34,10 @@ impl GroupedSolution {
         v.iter().map(|x| x.as_string()).collect()
     }
 
+    pub fn len(&self) -> usize {
+        self.solutions.len()
+    }
+
     pub fn matches(&self, solution: &[Word]) -> bool {
         // let mut words = self.words();
         let words = self.words();
@@ -136,18 +140,23 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     Some(solutions)
 }
 
-pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<Word>> {
-    let board = Board::from_string(boardstring);
-    let size = board.size();
-    let board_histogram = CharHistogram::from_board(&board);
+pub fn reduce_words(board: &Board, lengths: &[usize], words: &[String]) -> Vec<String> {
+    let board_histogram = CharHistogram::from_board(board);
     let reduced_words: Vec<String> = words
         .into_iter()
         .filter(|x| lengths.contains(&x.len()))
         .filter(|x| board_histogram.writeable(x))
-        .map(|x| x.clone())
+        .cloned()
         .collect();
-    let graph = CharGraph::from_strings(&reduced_words);
+    reduced_words
+}
 
+pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<Word>> {
+    let board = Board::from_string(boardstring);
+    let size = board.size();
+    let reduced_words = reduce_words(&board, lengths, words);
+    let graph = CharGraph::from_strings(&reduced_words);
+    println!("Number of reduced words: {}", reduced_words.len());
     let mut solutions: Vec<Vec<Word>> = vec![];
     let mask = Mask::new(size);
     let word = Word::new();
