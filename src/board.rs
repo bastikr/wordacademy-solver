@@ -61,7 +61,7 @@ impl Board {
                 data.push(chars[size*i + j]);
             }
         }
-        Board { data: data, rows: vec![size; size]}
+        Board { data, rows: vec![size; size]}
     }
 
     pub fn size(&self) -> usize {
@@ -94,7 +94,7 @@ impl Board {
             }
             rows.push(rowcounter);
         }
-        Board { data: data, rows: rows }
+        Board { data, rows }
     }
 }
 
@@ -127,7 +127,7 @@ pub struct Mask {
 
 impl Mask {
     pub fn new(size: usize) -> Mask {
-        Mask {size: size, data: vec![true; size*size ]}
+        Mask { size, data: vec![true; size*size ] }
     }
 
     pub fn get(&self, i: usize, j: usize) -> bool {
