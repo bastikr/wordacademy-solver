@@ -16,7 +16,7 @@ impl CharGraph {
         }
     }
 
-    pub fn from_strings(words: &[&String]) -> CharGraph {
+    pub fn from_strings(words: &[String]) -> CharGraph {
         let mut graph = CharGraph::new();
         for word in words {
             graph.push(word, word.len());
@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn build_chargraph_from_dict() {
         let words_lower = load("/usr/share/dict/cracklib-small");
-        let words = words_lower.iter().collect::<Vec<&String>>();
+        let words = words_lower.into_iter().collect::<Vec<String>>();
         let graph = CharGraph::from_strings(&words);
     }
 }

@@ -136,15 +136,15 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     Some(solutions)
 }
 
-pub fn solve<'a>(boardstring: &str, lengths: &[usize], words: &[&'a String]) -> Vec<Vec<Word>> {
+pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<Word>> {
     let board = Board::from_string(boardstring);
     let size = board.size();
     let board_histogram = CharHistogram::from_board(&board);
-    let reduced_words: Vec<&'a String> = words
+    let reduced_words: Vec<String> = words
         .into_iter()
         .filter(|x| lengths.contains(&x.len()))
         .filter(|x| board_histogram.writeable(x))
-        .map(|x| *x)
+        .map(|x| x.clone())
         .collect();
     let graph = CharGraph::from_strings(&reduced_words);
 

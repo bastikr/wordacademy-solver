@@ -29,7 +29,7 @@ fn main() {
     // let words_lower = wordacademy_solver::dictionary::load("data/words.txt");
     // let words_lower = wordacademy_solver::dictionary::load("data/word_list_german_spell_checked.txt");
     let words_lower = wordacademy_solver::dictionary::load_hunspell("data/words_german.dic");
-    let words = words_lower.iter().collect::<Vec<&String>>();
+    let words = words_lower.into_iter().collect::<Vec<String>>();
     println!("Number of loaded words {}", words.len());
 
     // let board = "ucegtpocebcilhal";
