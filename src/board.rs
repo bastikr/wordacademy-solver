@@ -15,10 +15,13 @@ impl Word {
     }
 
     pub fn add(&self, i: usize, j: usize, x: char) -> Word {
-        let mut w = self.clone();
-        w.chars.push(x);
-        w.coordinates.push((i, j));
-        w
+        let mut chars : Vec<char> = Vec::with_capacity(self.chars.len() + 1);
+        let mut coordinates : Vec<(usize, usize)> = Vec::with_capacity(self.coordinates.len() + 1);
+        chars.extend(&self.chars);
+        chars.push(x);
+        coordinates.extend(&self.coordinates);
+        coordinates.push((i, j));
+        Word { chars, coordinates }
     }
 
     pub fn as_string(&self) -> String {
