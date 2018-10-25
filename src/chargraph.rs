@@ -21,7 +21,7 @@ impl CharGraph {
     }
 
     pub fn push(&mut self, word: &str, length: usize) {
-        if word.len()==0 {
+        if word.is_empty() {
             self.isword = true;
         } else {
             let subgraph = self.subgraphs.entry(word.chars().next().unwrap())

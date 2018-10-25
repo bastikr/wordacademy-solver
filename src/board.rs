@@ -38,6 +38,10 @@ impl Word {
     pub fn len(&self) -> usize {
         self.chars.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.chars.is_empty()
+    }
 }
 
 #[derive(Debug)]
