@@ -30,7 +30,7 @@ fn main() {
     // let words_lower = wordacademy_solver::dictionary::load("data/word_list_german_spell_checked.txt");
     let words_lower = wordacademy_solver::dictionary::load_hunspell("data/words_german.dic");
     let words = words_lower.into_iter().collect::<Vec<String>>();
-    println!("Number of loaded words {}", words.len());
+    println!("Number of loaded words: {}", words.len());
 
     // let board = "ucegtpocebcilhal";
     // let wordlengths = vec![7, 6, 3];
@@ -45,6 +45,6 @@ fn main() {
     let gsolutions = wordacademy_solver::solver_positional::group_solutions(solutions);
     println!("Found {} solutions.", gsolutions.len());
     for solution in gsolutions {
-        println!("{:?}", solution.words());
+        println!("{:?} : ({} variations)", solution.words(), solution.len());
     }
 }
