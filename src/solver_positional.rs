@@ -57,7 +57,7 @@ pub fn group_solutions(solutions: Vec<Vec<Word>>) -> Vec<GroupedSolution> {
     let mut g : Vec<GroupedSolution> = vec![];
     for solution in solutions {
         let mut wasused = false;
-        for gsolution in g.iter_mut() {
+        for gsolution in &mut g {
             if gsolution.matches(&solution) {
                 gsolution.push(solution.clone());
                 wasused = true;

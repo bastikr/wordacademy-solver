@@ -20,14 +20,14 @@ impl Word {
 
     pub fn as_string(&self) -> String {
         let mut s = String::with_capacity(self.chars.len());
-        for x in self.chars.iter() {
+        for x in &self.chars {
             s.push(*x);
         }
         s
     }
 
     fn contains_coordinates(&self, i: usize, j: usize) -> bool {
-        for (i_word, j_word) in self.coordinates.iter() {
+        for (i_word, j_word) in &self.coordinates {
             if *i_word==i && *j_word==j {
                 return true;
             }

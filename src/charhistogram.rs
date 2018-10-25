@@ -28,7 +28,7 @@ impl CharHistogram {
     }
 
     pub fn contains(&self, subhistogram: &CharHistogram) -> bool {
-        for (letter, subcount) in subhistogram.data.iter() {
+        for (letter, subcount) in &subhistogram.data {
             if match self.data.get(&letter) {
                 Some(count_available) => subcount>count_available,
                 None => true
@@ -45,7 +45,7 @@ impl CharHistogram {
     pub fn substract(&self, word: &str) -> CharHistogram {
         let letter_hist = CharHistogram::from_word(word);
         let mut h : HashMap<char, u8> = HashMap::new();
-        for (letter, count) in self.data.iter() {
+        for (letter, count) in &self.data {
             let c = match letter_hist.data.get(letter) {
                 Some(letters_count) => *letters_count,
                 None => 0
