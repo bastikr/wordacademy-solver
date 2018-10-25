@@ -140,12 +140,52 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     Some(solutions)
 }
 
+fn column_contains_char(j: usize, board: &Board, x: char) -> bool {
+    for i in 0..board.size() {
+        if board.get(i, j) == x {
+            return true;
+        }
+    }
+    false
+}
+
+fn writeable(word: &str, board: &Board) -> bool {
+    let mut it = word.chars();
+    let mut x0 = it.next().unwrap();
+    for x1 in it {
+        let mut found_pair = false;
+        for j in 0..board.size() {
+            if !column_contains_char(j, board, x0) {
+                continue;
+            }
+            if j>0 && column_contains_char(j-1, board, x1) {
+                found_pair = true;
+                break;
+            }
+            if column_contains_char(j, board, x1) {
+                found_pair = true;
+                break;
+            }
+            if j+1<board.size() && column_contains_char(j+1, board, x1) {
+                found_pair = true;
+                break;
+            }
+        }
+        if !found_pair {
+            return false;
+        }
+        x0 = x1;
+    }
+    true
+}
+
 pub fn reduce_words(board: &Board, lengths: &[usize], words: &[String]) -> Vec<String> {
     let board_histogram = CharHistogram::from_board(board);
     let reduced_words: Vec<String> = words
         .into_iter()
         .filter(|x| lengths.contains(&x.len()))
         .filter(|x| board_histogram.writeable(x))
+        .filter(|x| writeable(x, board))
         .cloned()
         .collect();
     reduced_words
