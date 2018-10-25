@@ -26,7 +26,7 @@ impl CharGraph {
             self.isword = true;
         } else {
             let subgraph = self.subgraphs.entry(word.chars().next().unwrap())
-                                         .or_insert(CharGraph::new());
+                                         .or_insert_with(CharGraph::new);
             if length<15 {
                 self.lengths[length] = true;
             }
