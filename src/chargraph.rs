@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Debug, Default)]
 pub struct CharGraph {
     pub isword : bool,
     lengths : [bool; 15],

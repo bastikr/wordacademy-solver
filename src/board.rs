@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Word {
     pub chars : Vec<char>,
     pub coordinates : Vec<(usize, usize)>,
