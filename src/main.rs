@@ -42,8 +42,9 @@ fn main() {
     // let wordlengths = vec![6, 7, 3];
 
     let solutions = wordacademy_solver::solver_positional::solve(&board, &wordlengths, &words);
+    println!("Found {} solutions.", solutions.len());
     let gsolutions = wordacademy_solver::solver_positional::group_solutions(solutions);
-    println!("Found {} solutions.", gsolutions.len());
+    println!("Found {} grouped solutions.", gsolutions.len());
     for solution in gsolutions {
         println!("{:?} : ({} variations)", solution.words(), solution.len());
     }

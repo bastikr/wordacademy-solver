@@ -87,17 +87,20 @@ fn contains_a_length(graph: &CharGraph, lengths: &[usize]) -> bool {
 
 fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
     let currentchar = state.board.get(i, j);
-    if !state.graph.subgraphs.contains_key(&currentchar)
+    if !state.graph.contains_key(&currentchar)
         || !contains_a_length(state.graph, state.lengths)
     {
         return None;
     }
     let word = state.word.add(i, j, currentchar);
-    let graph: &CharGraph = &state.graph.subgraphs[&currentchar];
+    let graph: &CharGraph = &state.graph.subgraph(&currentchar);
     let mut solutions: Vec<Vec<Word>> = vec![];
-    if graph.isword && state.lengths.contains(&word.len()) {
+    if graph.isword() && state.lengths.contains(&word.len()) {
         if state.lengths.len() == 1 {
             return Some(vec![vec![word]]);
+        }
+        if state.lengths.len() > 6 {
+            println!("{}", word.as_string());
         }
         let board = state.board.reduce(&word);
         let lengths = reduce_lengths(state.lengths, word.chars.len());
@@ -132,7 +135,8 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
         graph,
         ..*state
     };
-    for (i_next, j_next) in state.mask.neighbours(i, j) {
+    for (i_next, j_next) in state.mask.neighbours(i, j).filter(|x| state.mask.get(x.0, x.1)) {
+    // for (i_next, j_next) in state.mask.neighbours2(i, j) {
         if let Some(subsolutions) = walk(i_next, j_next, &nextstate) {
             solutions.extend(subsolutions)
         }
@@ -211,6 +215,7 @@ pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<
     };
     for i in 0..size {
         for j in 0..size {
+            println!("i={} j={}", i, j);
             if let Some(subsolutions) = walk(i, j, &state) {
                 solutions.extend(subsolutions)
             }

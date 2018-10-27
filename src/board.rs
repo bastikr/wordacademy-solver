@@ -128,6 +128,95 @@ impl fmt::Display for Board {
     }
 }
 
+
+pub struct Neighbours {
+    count: usize,
+    size: usize,
+    i0: usize,
+    j0: usize,
+}
+
+impl Neighbours {
+    pub fn new(size: usize, i: usize, j: usize) -> Neighbours {
+        Neighbours { count: 0, size: size, i0: i, j0: j}
+    }
+}
+
+impl Iterator for Neighbours {
+    type Item = (usize, usize);
+
+    fn next(&mut self) -> Option<(usize, usize)> {
+        match self.count {
+            0 => {
+                if self.i0==0 {
+                    if self.j0+1==self.size {
+                        self.count = 5;
+                    } else {
+                        self.count = 3;
+                    }
+                    return self.next();
+                }
+                if self.j0==0 {
+                    self.count = 1;
+                    return self.next();
+                }
+                self.count = 1;
+                return Some((self.i0-1, self.j0-1));
+            },
+            1 => {
+                if self.j0+1==self.size {
+                    if self.i0+1==self.size {
+                        self.count = 7;
+                    } else {
+                        self.count = 5;
+                    }
+                } else {
+                    self.count = 2
+                }
+                return Some((self.i0-1, self.j0));
+            },
+            2 => {
+                self.count = 3;
+                return Some((self.i0-1, self.j0+1));
+            },
+            3 => {
+                if self.i0+1==self.size {
+                    if self.j0==0 {
+                        self.count = 8;
+                    } else {
+                        self.count = 7;
+                    }
+                } else {
+                    self.count = 4;
+                }
+                return Some((self.i0, self.j0+1));
+            },
+            4 => {
+                self.count = 5;
+                return Some((self.i0+1, self.j0+1));
+            },
+            5 => {
+                if self.j0==0 {
+                    self.count = 8;
+                } else {
+                    self.count = 6;
+                }
+                return Some((self.i0+1, self.j0));
+            },
+            6 => {
+                self.count = 7;
+                return Some((self.i0+1, self.j0-1));
+            },
+            7 => {
+                self.count = 8;
+                return Some((self.i0, self.j0-1));
+            }
+
+            _ => return None,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Mask {
     size: usize,
@@ -160,7 +249,11 @@ impl Mask {
         mask
     }
 
-    pub fn neighbours(&self, i: usize, j: usize) -> Vec<(usize, usize)> {
+    pub fn neighbours(&self, i: usize, j: usize) -> Neighbours {
+        Neighbours { count: 0, size: self.size, i0: i, j0: j }
+    }
+
+    pub fn neighbours2(&self, i: usize, j: usize) -> Vec<(usize, usize)> {
         let mut x: Vec<(usize, usize)> = vec![];
         if i > 0 {
             if j > 0 && self.get(i - 1, j - 1) {
@@ -197,10 +290,15 @@ impl Mask {
 #[cfg(test)]
 mod tests {
     // use boards::Board;
-    // use boards::Mask;
+    use board::{Neighbours, Mask};
 
-    // #[test]
-    // fn mask() {
+    #[test]
+    fn neighbours() {
 
-    // }
+        let n = Neighbours { count: 0, size: 3, i0: 0, j0:0 };
+        for (i, j) in n {
+            println!("{}, {}", i, j);
+        }
+        // for println!("{}", n.collect());
+    }
 }
