@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 
+
 #[derive(Debug, Default)]
 pub struct CharGraph {
-    pub isword: bool,
+    isword: bool,
     lengths: [bool; 15],
-    pub subgraphs: HashMap<char, CharGraph>,
+    pub chars: Vec<char>,
+    pub subgraphs: Vec<CharGraph>,
+
+    // pub subgraphs: HashMap<char, CharGraph>,
 }
 
 impl CharGraph {
@@ -12,8 +16,13 @@ impl CharGraph {
         CharGraph {
             isword: false,
             lengths: [false; 15],
-            subgraphs: HashMap::new(),
+            chars: vec![],
+            subgraphs: vec![],
         }
+    }
+
+    pub fn isword(&self) -> bool {
+        self.isword
     }
 
     pub fn from_strings(words: &[String]) -> CharGraph {
@@ -28,10 +37,11 @@ impl CharGraph {
         if word.is_empty() {
             self.isword = true;
         } else {
-            let subgraph = self
-                .subgraphs
-                .entry(word.chars().next().unwrap())
-                .or_insert_with(CharGraph::new);
+            let x = word.chars().next().unwrap();
+            let subgraph = match self.chars.binary_search(&x) {
+                Ok(index) => &mut self.subgraphs[index],
+                Err(index) => { self.chars.insert(index, x); self.subgraphs.insert(index, CharGraph::new()); &mut self.subgraphs[index] }
+            };
             if length < 15 {
                 self.lengths[length] = true;
             }
@@ -44,6 +54,22 @@ impl CharGraph {
             return true;
         }
         self.lengths[length]
+    }
+
+    pub fn contains_key(&self, x: &char) -> bool {
+        self.chars.contains(x)
+    }
+
+    pub fn sort(&mut self) {
+
+    }
+
+    pub fn subgraph(&self, x: &char) -> &CharGraph {
+        let subgraph = match self.chars.binary_search(&x) {
+            Ok(index) => &self.subgraphs[index],
+            Err(index) => { panic!("bla") }
+        };
+        &subgraph
     }
 }
 
