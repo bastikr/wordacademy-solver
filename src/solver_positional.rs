@@ -9,6 +9,7 @@ struct State<'a> {
     mask: Mask,
     graph: &'a CharGraph,
     dictionary_graph: &'a CharGraph,
+    dictionary: &'a Vec<String>,
 }
 
 fn reduce_lengths(lengths: &[usize], l: usize) -> Vec<usize> {
@@ -105,7 +106,33 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
         let board = state.board.reduce(&word);
         let lengths = reduce_lengths(state.lengths, word.chars.len());
         let mask = Mask::from_board(&board);
+        if state.lengths.len() > 4 {
+            let dictionary = reduce_words(&board, &lengths, state.dictionary);
+            let graph = CharGraph::from_strings(&dictionary);
 
+            let nextstate = State {
+                word: Word::new(),
+                board: &board,
+                lengths: &lengths,
+                mask,
+                graph: &graph,
+                dictionary_graph: &graph,
+                dictionary: &dictionary,
+                ..*state
+            };
+
+            for j in 0..board.size() {
+                for i in 0..board.rows(j) {
+                    if let Some(subsolutions) = walk(i, j, &nextstate) {
+                        for s in subsolutions {
+                            let mut solution = vec![word.clone()];
+                            solution.extend(s);
+                            solutions.push(solution);
+                        }
+                    }
+                }
+            }
+        } else {
         let nextstate = State {
             word: Word::new(),
             board: &board,
@@ -126,6 +153,7 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
                 }
             }
         }
+    }
     }
     let mut mask = state.mask.clone();
     mask.set(i, j, false);
@@ -239,6 +267,7 @@ pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<
         mask,
         graph: &graph,
         dictionary_graph: &graph,
+        dictionary: &reduced_words
     };
     for i in 0..size {
         for j in 0..size {
