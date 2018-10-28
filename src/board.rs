@@ -232,11 +232,11 @@ impl Mask {
     }
 
     pub fn get(&self, i: usize, j: usize) -> bool {
-        self.data[self.size * j + i]
+        self.data[self.size * i + j]
     }
 
     pub fn set(&mut self, i: usize, j: usize, value: bool) {
-        self.data[self.size * j + i] = value;
+        self.data[self.size * i + j] = value;
     }
 
     pub fn from_board(board: &Board) -> Mask {
