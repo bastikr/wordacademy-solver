@@ -133,27 +133,27 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
                 }
             }
         } else {
-        let nextstate = State {
-            word: Word::new(),
-            board: &board,
-            lengths: &lengths,
-            mask,
-            graph: &state.dictionary_graph,
-            ..*state
-        };
+            let nextstate = State {
+                word: Word::new(),
+                board: &board,
+                lengths: &lengths,
+                mask,
+                graph: &state.dictionary_graph,
+                ..*state
+            };
 
-        for j in 0..board.size() {
-            for i in 0..board.rows(j) {
-                if let Some(subsolutions) = walk(i, j, &nextstate) {
-                    for s in subsolutions {
-                        let mut solution = vec![word.clone()];
-                        solution.extend(s);
-                        solutions.push(solution);
+            for j in 0..board.size() {
+                for i in 0..board.rows(j) {
+                    if let Some(subsolutions) = walk(i, j, &nextstate) {
+                        for s in subsolutions {
+                            let mut solution = vec![word.clone()];
+                            solution.extend(s);
+                            solutions.push(solution);
+                        }
                     }
                 }
             }
         }
-    }
     }
     let mut mask = state.mask.clone();
     mask.set(i, j, false);
@@ -163,11 +163,330 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
         graph,
         ..*state
     };
-    for (i_next, j_next) in state.mask.neighbours(i, j).filter(|x| state.mask.get(x.0, x.1)) {
-    // for (i_next, j_next) in state.mask.neighbours2(i, j) {
-        if let Some(subsolutions) = walk(i_next, j_next, &nextstate) {
-            solutions.extend(subsolutions)
+    // for (i_next, j_next) in state.mask.neighbours(i, j).filter(|x| state.mask.get(x.0, x.1)) {
+    // // for (i_next, j_next) in state.mask.neighbours2(i, j) {
+    //     if let Some(subsolutions) = walk(i_next, j_next, &nextstate) {
+    //         solutions.extend(subsolutions)
+    //     }
+    // }
+    let size = state.board.size();
+    // if i==0 {
+    //     if j==0 {
+    //         for (i_next, j_next) in [(0, 1), (1, 0), (1, 1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     } else if j+1==size{
+    //         for (i_next, j_next) in [(0, j-1), (1, j-1), (1, j)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     } else {
+    //         for (i_next, j_next) in [(0, j-1), (0, j+1), (1, j-1), (1, j), (1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     }
+    // } else if i+1==size {
+    //     if j==0 {
+    //         for (i_next, j_next) in [(i-1, 0), (i-1, 1), (i, 1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     } else if j+1==size{
+    //         for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i, j-1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     } else {
+    //         for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //             if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //                 solutions.extend(subsolutions)
+    //             }
+    //         }
+    //     }
+    // } else if j==0 {
+    //     for (i_next, j_next) in [(i-1, j), (i-1, j+1), (i, j+1), (i+1, j), (i+1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //         if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //             solutions.extend(subsolutions)
+    //         }
+    //     }
+    // } else if j+1==size {
+    //     for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i, j-1), (i+1, j-1), (i+1, j)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //         if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //             solutions.extend(subsolutions)
+    //         }
+    //     }
+    // } else {
+    //     for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+    //         if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+    //             solutions.extend(subsolutions)
+    //         }
+    //     }
+    // }
+    if i==0 {
+        if j==0 {
+            if state.mask.get(0, 1) {
+                if let Some(subsolutions) = walk(0, 1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, 0) {
+                if let Some(subsolutions) = walk(1, 0, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, 1) {
+                if let Some(subsolutions) = walk(1, 1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(0, 1), (1, 0), (1, 1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
+        } else if j+1==size {
+            if state.mask.get(0, j-1) {
+                if let Some(subsolutions) = walk(0, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, j-1) {
+                if let Some(subsolutions) = walk(1, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, j) {
+                if let Some(subsolutions) = walk(1, j, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(0, j-1), (1, j-1), (1, j)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
+        } else {
+            if state.mask.get(0, j-1) {
+                if let Some(subsolutions) = walk(0, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(0, j+1) {
+                if let Some(subsolutions) = walk(0, j+1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, j-1) {
+                if let Some(subsolutions) = walk(1, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, j) {
+                if let Some(subsolutions) = walk(1, j, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(1, j+1) {
+                if let Some(subsolutions) = walk(1, j+1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(0, j-1), (0, j+1), (1, j-1), (1, j), (1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
         }
+    } else if i+1==size {
+        if j==0 {
+            if state.mask.get(i-1, 0) {
+                if let Some(subsolutions) = walk(i-1, 0, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i-1, 1) {
+                if let Some(subsolutions) = walk(i-1, 1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i, 1) {
+                if let Some(subsolutions) = walk(i, 1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(i-1, 0), (i-1, 1), (i, 1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
+        } else if j+1==size{
+            if state.mask.get(i-1, j-1) {
+                if let Some(subsolutions) = walk(i-1, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i-1, j) {
+                if let Some(subsolutions) = walk(i-1, j, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i, j-1) {
+                if let Some(subsolutions) = walk(i, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i, j-1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
+        } else {
+            if state.mask.get(i-1, j-1) {
+                if let Some(subsolutions) = walk(i-1, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i-1, j) {
+                if let Some(subsolutions) = walk(i-1, j, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i-1, j+1) {
+                if let Some(subsolutions) = walk(i-1, j+1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i, j-1) {
+                if let Some(subsolutions) = walk(i, j-1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            if state.mask.get(i, j+1) {
+                if let Some(subsolutions) = walk(i, j+1, &nextstate) {
+                    solutions.extend(subsolutions)
+                }
+            }
+            // for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+            //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+            //         solutions.extend(subsolutions)
+            //     }
+            // }
+        }
+    } else if j==0 {
+        if state.mask.get(i-1, j) {
+            if let Some(subsolutions) = walk(i-1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i-1, j+1) {
+            if let Some(subsolutions) = walk(i-1, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i, j+1) {
+            if let Some(subsolutions) = walk(i, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i+1, j) {
+            if let Some(subsolutions) = walk(i+1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i+1, j+1) {
+            if let Some(subsolutions) = walk(i+1, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        // for (i_next, j_next) in [(i-1, j), (i-1, j+1), (i, j+1), (i+1, j), (i+1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+        //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+        //         solutions.extend(subsolutions)
+        //     }
+        // }
+    } else if j+1==size {
+        if state.mask.get(i-1, j-1) {
+            if let Some(subsolutions) = walk(i-1, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+         if state.mask.get(i-1, j) {
+            if let Some(subsolutions) = walk(i-1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+         if state.mask.get(i, j-1) {
+            if let Some(subsolutions) = walk(i, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+         if state.mask.get(i+1, j-1) {
+            if let Some(subsolutions) = walk(i+1, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+         if state.mask.get(i+1, j) {
+            if let Some(subsolutions) = walk(i+1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        // for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i, j-1), (i+1, j-1), (i+1, j)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+        //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+        //         solutions.extend(subsolutions)
+        //     }
+        // }
+    } else {
+        if state.mask.get(i-1, j-1) {
+            if let Some(subsolutions) = walk(i-1, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i-1, j) {
+            if let Some(subsolutions) = walk(i-1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i-1, j+1) {
+            if let Some(subsolutions) = walk(i-1, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i, j-1) {
+            if let Some(subsolutions) = walk(i, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i, j+1) {
+            if let Some(subsolutions) = walk(i, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i+1, j-1) {
+            if let Some(subsolutions) = walk(i+1, j-1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i+1, j) {
+            if let Some(subsolutions) = walk(i+1, j, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        if state.mask.get(i+1, j+1) {
+            if let Some(subsolutions) = walk(i+1, j+1, &nextstate) {
+                solutions.extend(subsolutions)
+            }
+        }
+        // for (i_next, j_next) in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)].into_iter().filter(|x| state.mask.get(x.0, x.1)) {
+        //     if let Some(subsolutions) = walk(*i_next, *j_next, &nextstate) {
+        //         solutions.extend(subsolutions)
+        //     }
+        // }
     }
     Some(solutions)
 }
@@ -271,6 +590,8 @@ pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<
     };
     for i in 0..size {
         for j in 0..size {
+            // let i = 2;
+            // let j = 2;
             println!("i={} j={}", i, j);
             if let Some(subsolutions) = walk(i, j, &state) {
                 solutions.extend(subsolutions)
