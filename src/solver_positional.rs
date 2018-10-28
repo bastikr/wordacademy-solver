@@ -183,13 +183,40 @@ fn writeable(word: &str, board: &Board) -> bool {
     true
 }
 
+fn writeable2(word: &str, board: &Board) -> bool {
+    let mut v0 = vec![true; board.size()];
+    let mut v1 = vec![false; board.size()];
+    for x in word.chars() {
+        for j in 0..board.size() {
+            if v0[j] && column_contains_char(j, board, x) {
+                if j>0 {
+                    v1[j-1] = true;
+                }
+                v1[j] = true;
+                if j+1<board.size() {
+                    v1[j+1] = true;
+                }
+            }
+        }
+        if !v1.iter().any(|x| *x) {
+            return false;
+        }
+        let tmp = v0;
+        v0 = v1;
+        v1 = tmp;
+        // v0.swap(v1);
+        v1.iter_mut().map(|x| *x = false).count();
+    }
+    return true;
+}
+
 pub fn reduce_words(board: &Board, lengths: &[usize], words: &[String]) -> Vec<String> {
     let board_histogram = CharHistogram::from_board(board);
     let reduced_words: Vec<String> = words
         .into_iter()
         .filter(|x| lengths.contains(&x.len()))
         .filter(|x| board_histogram.writeable(x))
-        .filter(|x| writeable(x, board))
+        .filter(|x| writeable2(x, board))
         .cloned()
         .collect();
     reduced_words
