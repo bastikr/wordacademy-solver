@@ -57,7 +57,10 @@ impl CharGraph {
     }
 
     pub fn contains_key(&self, x: &char) -> bool {
-        self.chars.contains(x)
+        match self.chars.binary_search(x) {
+            Ok(_) => true,
+            Err(_) => false
+        }
     }
 
     pub fn sort(&mut self) {
