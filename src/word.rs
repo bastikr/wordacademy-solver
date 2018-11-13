@@ -30,13 +30,8 @@ impl Word {
         s
     }
 
-    pub fn contains_coordinates(&self, i: usize, j: usize) -> bool {
-        for (i_word, j_word) in &self.coordinates {
-            if *i_word == i && *j_word == j {
-                return true;
-            }
-        }
-        false
+    pub fn contains_coordinates(&self, c: &(usize, usize)) -> bool {
+        self.coordinates.contains(c)
     }
 
     pub fn len(&self) -> usize {

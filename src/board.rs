@@ -44,7 +44,7 @@ impl Board {
         for j in 0..size {
             let mut rowcounter = 0;
             for i in 0..self.rows(j) {
-                if word.contains_coordinates(i, j) {
+                if word.contains_coordinates(&(i, j)) {
                     continue;
                 }
                 data.push(self.get(i, j));
