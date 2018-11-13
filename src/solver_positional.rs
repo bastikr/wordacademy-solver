@@ -1,9 +1,11 @@
-use board::{Board, Mask, Word};
+use board::{Board, Mask};
+use word::Word;
 use chargraph::CharGraph;
 use charhistogram::CharHistogram;
 
 struct State<'a> {
     word: Word,
+    previous_word: Option<&'a Word>,
     board: &'a Board,
     lengths: &'a Vec<usize>,
     mask: Mask,
@@ -100,55 +102,65 @@ fn walk(i: usize, j: usize, state: &State) -> Option<Vec<Vec<Word>>> {
         if state.lengths.len() == 1 {
             return Some(vec![vec![word]]);
         }
-        if state.lengths.len() > 6 {
-            println!("{}", word.as_string());
-        }
-        let board = state.board.reduce(&word);
-        let lengths = reduce_lengths(state.lengths, word.chars.len());
-        let mask = Mask::from_board(&board);
-        if state.lengths.len() > 4 {
-            let dictionary = reduce_words(&board, &lengths, state.dictionary);
-            let graph = CharGraph::from_strings(&dictionary);
+        let is_permutation = match state.previous_word {
+            Some(w) => {
+                word.is_before_previous(w) && word.commutates_with_previous(w)
+            },
+            None => false
+        };
+        if !is_permutation {
+            if state.lengths.len() > 6 {
+                println!("{}", word.as_string());
+            }
+            let board = state.board.reduce(&word);
+            let lengths = reduce_lengths(state.lengths, word.chars.len());
+            let mask = Mask::from_board(&board);
+            if state.lengths.len() > 4 {
+                let dictionary = reduce_words(&board, &lengths, state.dictionary);
+                let graph = CharGraph::from_strings(&dictionary);
 
-            let nextstate = State {
-                word: Word::new(),
-                board: &board,
-                lengths: &lengths,
-                mask,
-                graph: &graph,
-                dictionary_graph: &graph,
-                dictionary: &dictionary,
-                ..*state
-            };
+                let nextstate = State {
+                    word: Word::new(),
+                    previous_word: Some(&state.word),
+                    board: &board,
+                    lengths: &lengths,
+                    mask,
+                    graph: &graph,
+                    dictionary_graph: &graph,
+                    dictionary: &dictionary,
+                    ..*state
+                };
 
-            for j in 0..board.size() {
-                for i in 0..board.rows(j) {
-                    if let Some(subsolutions) = walk(i, j, &nextstate) {
-                        for s in subsolutions {
-                            let mut solution = vec![word.clone()];
-                            solution.extend(s);
-                            solutions.push(solution);
+                for j in 0..board.size() {
+                    for i in 0..board.rows(j) {
+                        if let Some(subsolutions) = walk(i, j, &nextstate) {
+                            for s in subsolutions {
+                                let mut solution = vec![word.clone()];
+                                solution.extend(s);
+                                solutions.push(solution);
+                            }
                         }
                     }
                 }
-            }
-        } else {
-            let nextstate = State {
-                word: Word::new(),
-                board: &board,
-                lengths: &lengths,
-                mask,
-                graph: &state.dictionary_graph,
-                ..*state
-            };
+            } else {
+                let nextstate = State {
+                    word: Word::new(),
+                    previous_word: Some(&state.word),
+                    board: &board,
+                    lengths: &lengths,
+                    mask,
+                    graph: &state.dictionary_graph,
+                    ..*state
+                };
 
-            for j in 0..board.size() {
-                for i in 0..board.rows(j) {
-                    if let Some(subsolutions) = walk(i, j, &nextstate) {
-                        for s in subsolutions {
-                            let mut solution = vec![word.clone()];
-                            solution.extend(s);
-                            solutions.push(solution);
+                for j in 0..board.size() {
+                    for i in 0..board.rows(j) {
+                        if let Some(subsolutions) = walk(i, j, &nextstate) {
+                            for s in subsolutions {
+                                let mut solution = vec![word.clone()];
+                                solution.extend(s);
+                                solutions.push(solution);
+                            }
                         }
                     }
                 }
@@ -581,6 +593,7 @@ pub fn solve(boardstring: &str, lengths: &[usize], words: &[String]) -> Vec<Vec<
     let lengths_: Vec<usize> = Vec::from(lengths);
     let state = State {
         word,
+        previous_word: None,
         board: &board,
         lengths: &lengths_,
         mask,

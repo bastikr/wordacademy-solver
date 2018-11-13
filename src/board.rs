@@ -1,54 +1,6 @@
 use std::fmt;
+use word::Word;
 
-#[derive(Debug, Clone, Default)]
-pub struct Word {
-    pub chars: Vec<char>,
-    pub coordinates: Vec<(usize, usize)>,
-}
-
-impl Word {
-    pub fn new() -> Word {
-        Word {
-            chars: vec![],
-            coordinates: vec![],
-        }
-    }
-
-    pub fn add(&self, i: usize, j: usize, x: char) -> Word {
-        let mut chars : Vec<char> = Vec::with_capacity(self.chars.len() + 1);
-        let mut coordinates : Vec<(usize, usize)> = Vec::with_capacity(self.coordinates.len() + 1);
-        chars.extend(&self.chars);
-        chars.push(x);
-        coordinates.extend(&self.coordinates);
-        coordinates.push((i, j));
-        Word { chars, coordinates }
-    }
-
-    pub fn as_string(&self) -> String {
-        let mut s = String::with_capacity(self.chars.len());
-        for x in &self.chars {
-            s.push(*x);
-        }
-        s
-    }
-
-    fn contains_coordinates(&self, i: usize, j: usize) -> bool {
-        for (i_word, j_word) in &self.coordinates {
-            if *i_word == i && *j_word == j {
-                return true;
-            }
-        }
-        false
-    }
-
-    pub fn len(&self) -> usize {
-        self.chars.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.chars.is_empty()
-    }
-}
 
 #[derive(Debug)]
 pub struct Board {
